@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificación de Redes de Computadores</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .mindmap-container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mindmap-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .mindmap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .central-node {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 50px;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .central-node:hover {
+            transform: scale(1.05);
+        }
+
+        .branches-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+        }
+
+        .branch {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .branch::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            transform: translate(30px, -30px);
+        }
+
+        .branch:nth-child(1) {
+            border-left-color: #ff6b6b;
+        }
+        .branch:nth-child(1)::before {
+            background: #ff6b6b;
+        }
+
+        .branch:nth-child(2) {
+            border-left-color: #4ecdc4;
+        }
+        .branch:nth-child(2)::before {
+            background: #4ecdc4;
+        }
+
+        .branch:nth-child(3) {
+            border-left-color: #45b7d1;
+        }
+        .branch:nth-child(3)::before {
+            background: #45b7d1;
+        }
+
+        .branch:nth-child(4) {
+            border-left-color: #96ceb4;
+        }
+        .branch:nth-child(4)::before {
+            background: #96ceb4;
+        }
+
+        .branch:nth-child(5) {
+            border-left-color: #feca57;
+        }
+        .branch:nth-child(5)::before {
+            background: #feca57;
+        }
+
+        .branch:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .branch-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .branch-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .extension .branch-icon { background: #ff6b6b; }
+        .topology .branch-icon { background: #4ecdc4; }
+        .connection .branch-icon { background: #45b7d1; }
+        .transmission .branch-icon { background: #96ceb4; }
+        .usage .branch-icon { background: #feca57; }
+
+        .subbranches {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .subbranch {
+            background: #f8f9fa;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border-left: 3px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .subbranch:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .extension .subbranch { border-left-color: #ff6b6b; }
+        .topology .subbranch { border-left-color: #4ecdc4; }
+        .connection .subbranch { border-left-color: #45b7d1; }
+        .transmission .subbranch { border-left-color: #96ceb4; }
+        .usage .subbranch { border-left-color: #feca57; }
+
+        .subbranch-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .subbranch-desc {
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .branches-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .central-node {
+                font-size: 1.2rem;
+                padding: 15px 30px;
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mindmap-container">
+        <h1 class="title fade-in">Clasificación de Redes de Computadores</h1>
+        
+        <div class="mindmap">
+            <div class="central-node fade-in">
+                REDES DE COMPUTADORES
+            </div>
+            
+            <div class="branches-container">
+                <!-- Por su Extensión -->
+                <div class="branch extension fade-in" style="animation-delay: 0.2s;">
+                    <div class="branch-title">
+                        <span class="branch-icon"></span>
+                        A) Por su Extensión
+                    </div>
+                    <div class="subbranches">
+                        <div class="subbranch">
+                            <div class="subbranch-title">PAN (Personal Area Network)</div>
+                            <div class="subbranch-desc">Red personal de alcance muy limitado (1-10 metros). Ej: Bluetooth, USB</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">LAN (Local Area Network)</div>
+                            <div class="subbranch-desc">Red local que cubre un edificio o campus (hasta 1 km)</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">MAN (Metropolitan Area Network)</div>
+                            <div class="subbranch-desc">Red metropolitana que cubre una ciudad (10-100 km)</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">WAN (Wide Area Network)</div>
+                            <div class="subbranch-desc">Red amplia que cubre países o continentes (>100 km)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Por su Topología -->
+                <div class="branch topology fade-in" style="animation-delay: 0.4s;">
+                    <div class="branch-title">
+                        <span class="branch-icon"></span>
+                        B) Por su Topología
+                    </div>
+                    <div class="subbranches">
+                        <div class="subbranch">
+                            <div class="subbranch-title">Bus</div>
+                            <div class="subbranch-desc">Todos los dispositivos conectados a un cable principal</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Estrella</div>
+                            <div class="subbranch-desc">Dispositivos conectados a un nodo central (hub/switch)</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Anillo</div>
+                            <div class="subbranch-desc">Dispositivos conectados en forma circular</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Malla</div>
+                            <div class="subbranch-desc">Múltiples conexiones entre dispositivos (parcial o completa)</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Híbrida</div>
+                            <div class="subbranch-desc">Combinación de dos o más topologías</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Por su Conexión Física -->
+                <div class="branch connection fade-in" style="animation-delay: 0.6s;">
+                    <div class="branch-title">
+                        <span class="branch-icon"></span>
+                        C) Por su Conexión Física
+                    </div>
+                    <div class="subbranches">
+                        <div class="subbranch">
+                            <div class="subbranch-title">Redes Cableadas</div>
+                            <div class="subbranch-desc">Utilizan cables físicos: par trenzado, coaxial, fibra óptica</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Redes Inalámbricas</div>
+                            <div class="subbranch-desc">Utilizan ondas electromagnéticas: Wi-Fi, Bluetooth, microondas</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Redes Híbridas</div>
+                            <div class="subbranch-desc">Combinan conexiones cableadas e inalámbricas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Por su Técnica de Transmisión -->
+                <div class="branch transmission fade-in" style="animation-delay: 0.8s;">
+                    <div class="branch-title">
+                        <span class="branch-icon"></span>
+                        D) Por su Técnica de Transmisión
+                    </div>
+                    <div class="subbranches">
+                        <div class="subbranch">
+                            <div class="subbranch-title">Broadcast (Difusión)</div>
+                            <div class="subbranch-desc">Un solo canal de comunicación compartido por todos</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Point-to-Point (Punto a Punto)</div>
+                            <div class="subbranch-desc">Conexiones individuales entre pares de dispositivos</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Conmutación de Circuitos</div>
+                            <div class="subbranch-desc">Se establece un camino dedicado para la comunicación</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Conmutación de Paquetes</div>
+                            <div class="subbranch-desc">Los datos se dividen en paquetes que siguen rutas independientes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Por su Uso -->
+                <div class="branch usage fade-in" style="animation-delay: 1.0s;">
+                    <div class="branch-title">
+                        <span class="branch-icon"></span>
+                        E) Por su Uso
+                    </div>
+                    <div class="subbranches">
+                        <div class="subbranch">
+                            <div class="subbranch-title">Redes Privadas</div>
+                            <div class="subbranch-desc">Acceso restringido a usuarios autorizados de una organización</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Redes Públicas</div>
+                            <div class="subbranch-desc">Acceso abierto al público en general</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Intranet</div>
+                            <div class="subbranch-desc">Red interna de una organización usando tecnologías de Internet</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Extranet</div>
+                            <div class="subbranch-desc">Extensión de intranet con acceso controlado para externos</div>
+                        </div>
+                        <div class="subbranch">
+                            <div class="subbranch-title">Internet</div>
+                            <div class="subbranch-desc">Red global de redes interconectadas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Agregar efectos de animación cuando los elementos entran en vista
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationDelay = '0s';
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observar todos los elementos con animación
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Agregar efectos de hover interactivos
+        document.querySelectorAll('.subbranch').forEach(subbranch => {
+            subbranch.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px) scale(1.02)';
+            });
+            
+            subbranch.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
